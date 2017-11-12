@@ -84,8 +84,13 @@ public:
     void deinit(void);
     boolean update(void);
 
-    int getLinear(void);
-    int getAngular(void);
+    void setLinearX(float val);
+    void setLinearY(float val);
+    void setAngularZ(float val);
+
+    float getLinearX(void);
+    float getLinearY(void);
+    float getAngularZ(void);
 
     void setVoltage(float val);
 

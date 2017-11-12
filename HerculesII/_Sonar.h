@@ -71,6 +71,8 @@ private:
 
 };
 
+extern HerculesSonar sonar;
+
 /* Exported functions ------------------------------------------------------- */
 
 #endif/*__SONAR_H__*/

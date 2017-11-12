@@ -66,6 +66,8 @@ private:
 
 };
 
+extern HerculesServo servo;
+
 /* Exported functions ------------------------------------------------------- */
 
 #endif/*__SERVO_H__*/

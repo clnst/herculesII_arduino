@@ -70,6 +70,8 @@ private:
     }MotorIo_t;
 };
 
+extern HerculesBattery battery;
+
 /* Exported functions ------------------------------------------------------- */
 
 #endif/*__BATTERY_H__*/

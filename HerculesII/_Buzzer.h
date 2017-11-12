@@ -65,6 +65,8 @@ private:
 
 };
 
+extern HerculesBuzzer buzzer;
+
 /* Exported functions ------------------------------------------------------- */
 
 #endif/*__BUZZER_H__*/

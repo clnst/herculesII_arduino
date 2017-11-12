@@ -53,6 +53,7 @@
 #define dbg_init(v)                         Serial2.begin(v)
 #define dbg                                 Serial2.println
 
+/* Exported variable -------------------------------------------------------- */
 /* Exported functions ------------------------------------------------------- */
 
 #endif/*__IRQHANDER_H__*/

@@ -66,6 +66,8 @@ private:
 
 };
 
+extern HerculesOled oled;
+
 /* Exported functions ------------------------------------------------------- */
 
 #endif/*__OLED_H__*/

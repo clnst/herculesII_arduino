@@ -65,14 +65,6 @@ public:
     HerculesII(void);
     ~HerculesII(void);
 
-    HerculesBattery battery;
-    HerculesBuzzer  buzzer;
-    HerculesLamp    lamp;
-    HerculesMotor   motor;
-    HerculesOled    oled;
-    HerculesServo   servo;
-    HerculesSonar   sonar;
-
 private:
 
 };

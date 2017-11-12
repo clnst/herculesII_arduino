@@ -65,7 +65,6 @@
 /* Private variables ---------------------------------------------------------*/
 static HerculesII hercules;
 
-
 /**
   * @brief
   * @param
@@ -92,13 +91,13 @@ HerculesII::~HerculesII(void) {
 void setup() {
     // put your setup code here, to run once:
     dbg_init(9600);
-    hercules.battery.init();
-    hercules.buzzer.init();
-    hercules.lamp.init();
-    hercules.motor.init();
-    hercules.oled.init();
-    hercules.servo.init();
-    hercules.sonar.init();
+    battery.init();
+    buzzer.init();
+    lamp.init();
+    motor.init();
+    oled.init();
+    servo.init();
+    sonar.init();
 
     rostopic.init();
 }
@@ -110,13 +109,13 @@ void setup() {
   */
 void loop() {
     // put your main code here, to run repeatedly:
-    hercules.battery.update();
-    hercules.buzzer.update();
-    hercules.lamp.update();
-    hercules.motor.update();
-    hercules.oled.update();
-    hercules.servo.update();
-    hercules.sonar.update();
+    battery.update();
+    buzzer.update();
+    lamp.update();
+    motor.update();
+    oled.update();
+    servo.update();
+    sonar.update();
 
     rostopic.update();
 }

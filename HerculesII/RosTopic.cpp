@@ -177,6 +177,10 @@ boolean HerculesTopic::odom_update(void) {
 
     //set the velocity
     odom.twist.linear.x = linear.x;
+    odom.twist.linear.y = linear.y;
+    odom.twist.linear.z = linear.z;
+    odom.twist.angular.x = angular.x;
+    odom.twist.angular.y = angular.y;
     odom.twist.angular.z = angular.z;
 
     //publish the message
@@ -200,8 +204,8 @@ boolean HerculesTopic::update(void) {
   * @param
   * @retval
   */
-int HerculesTopic::getLinear(void) {
-    return (int)(rostopic.cmd_vel.linear.x*1000);
+void HerculesTopic::setLinearX(float val) {
+    linear.x = val;
 }
 
 /**
@@ -209,8 +213,44 @@ int HerculesTopic::getLinear(void) {
   * @param
   * @retval
   */
-int HerculesTopic::getAngular(void) {
-    return (int)(rostopic.cmd_vel.angular.z*1000);
+void HerculesTopic::setLinearY(float val) {
+    linear.y = val;
+}
+
+/**
+  * @brief
+  * @param
+  * @retval
+  */
+void HerculesTopic::setAngularZ(float val) {
+    angular.z = val;
+}
+
+/**
+  * @brief
+  * @param
+  * @retval
+  */
+float HerculesTopic::getLinearX(void) {
+    return rostopic.cmd_vel.linear.x;
+}
+
+/**
+  * @brief
+  * @param
+  * @retval
+  */
+float HerculesTopic::getLinearY(void) {
+    return rostopic.cmd_vel.linear.y;
+}
+
+/**
+  * @brief
+  * @param
+  * @retval
+  */
+float HerculesTopic::getAngularZ(void) {
+    return rostopic.cmd_vel.angular.z;
 }
 
 /**

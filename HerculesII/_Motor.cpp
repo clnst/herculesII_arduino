@@ -43,11 +43,11 @@
 /* Includes ------------------------------------------------------------------*/
 #include "_Motor.h"
 
+/* Public variables ---------------------------------------------------------*/
+HerculesMotor motor;
+
 /* Private variables ---------------------------------------------------------*/
-static volatile uint16_t    act[eMotorMax];
-static uint16_t             pwm[eMotorMax];
-static float                spd[eMotorMax];
-static float                dis[eMotorMax];
+
 
 /**
   * @brief
@@ -55,7 +55,7 @@ static float                dis[eMotorMax];
   * @retval
   */
 void MotorLF_IRQHandler(void) {
-    act[eMotorLF] += HALL_TRIGGER_INC;
+    motor.setPulseA(eMotorLF);
 }
 
 /**
@@ -64,7 +64,7 @@ void MotorLF_IRQHandler(void) {
   * @retval
   */
 void MotorRF_IRQHandler(void) {
-    act[eMotorRF] += HALL_TRIGGER_INC;
+    motor.setPulseA(eMotorRF);
 }
 
 /**
@@ -73,7 +73,7 @@ void MotorRF_IRQHandler(void) {
   * @retval
   */
 void MotorLB_IRQHandler(void) {
-    act[eMotorLB] += HALL_TRIGGER_INC;
+    motor.setPulseA(eMotorLB);
 }
 
 /**
@@ -82,7 +82,7 @@ void MotorLB_IRQHandler(void) {
   * @retval
   */
 void MotorRB_IRQHandler(void) {
-    act[eMotorRB] += HALL_TRIGGER_INC;
+    motor.setPulseA(eMotorRB);
 }
 
 /**
@@ -100,14 +100,14 @@ void HerculesMotor::setPwmFreq(uint32_t  clockA_freq) {
   * @param
   * @retval
   */
-void HerculesMotor::setPwmPin( uint32_t  pin ) {
+void HerculesMotor::setPwmPin(uint8_t  pin) {
     uint32_t  chan = g_APinDescription[pin].ulPWMChannel;
 	if (pin < 6 || pin > 9)
 		return;
-	PIO_Configure( g_APinDescription[pin].pPort,
-	                g_APinDescription[pin].ulPinType,
-				    g_APinDescription[pin].ulPin,
-				    g_APinDescription[pin].ulPinConfiguration);
+	PIO_Configure(g_APinDescription[pin].pPort,
+	              g_APinDescription[pin].ulPinType,
+				  g_APinDescription[pin].ulPin,
+				  g_APinDescription[pin].ulPinConfiguration);
 	PWMC_ConfigureChannel(PWM_INTERFACE, chan, PWM_CMR_CPRE_CLKA, 0, 0);
 	PWMC_SetPeriod(PWM_INTERFACE, chan, TC_MAX_DUTY_CYCLE);
 	PWMC_SetDutyCycle(PWM_INTERFACE, chan, 0);
@@ -119,7 +119,7 @@ void HerculesMotor::setPwmPin( uint32_t  pin ) {
   * @param
   * @retval
   */
-void HerculesMotor::setPwmDuty( uint32_t  pin,  uint32_t  duty ) {
+void HerculesMotor::setPwmDuty(uint8_t  pin,  uint8_t  duty ) {
     if (pin < 6 || pin > 9)
 		return;
 	PWMC_SetDutyCycle(PWM_INTERFACE, g_APinDescription[pin].ulPWMChannel, duty);
@@ -139,7 +139,7 @@ void HerculesMotor::setDir(MotorDrv_t drv, MotorDir_t dir) {
             }else{
                 digitalWrite(eMotorLF_DirPin+drv, LOW);
             }
-        break;
+            break;
         case eMotorLB:
         case eMotorRB:
             if(dir==eMotorDir_Backward){
@@ -147,7 +147,9 @@ void HerculesMotor::setDir(MotorDrv_t drv, MotorDir_t dir) {
             }else{
                 digitalWrite(eMotorLF_DirPin+drv, HIGH);
             }
-        break;
+            break;
+        default:
+            return;
     }
 }
 
@@ -156,8 +158,35 @@ void HerculesMotor::setDir(MotorDrv_t drv, MotorDir_t dir) {
   * @param
   * @retval
   */
-void HerculesMotor::setSpd(MotorDrv_t drv, uint16_t spd) {
+void HerculesMotor::setSpd(float spd_x, float spd_y, float spd_z) {
 
+    pre_spd[eMotorLF] = spd_x + spd_y - spd_z*_BODY_PARAM;
+    if(pre_spd[eMotorLF]>=0){
+        setDir(eMotorLF, eMotorDir_Forward);
+    }else{
+        setDir(eMotorLF, eMotorDir_Backward);
+    }
+
+    pre_spd[eMotorRF] = spd_x - spd_y + spd_z*_BODY_PARAM;
+    if(pre_spd[eMotorRF]>=0){
+        setDir(eMotorRF, eMotorDir_Forward);
+    }else{
+        setDir(eMotorRF, eMotorDir_Backward);
+    }
+
+    pre_spd[eMotorLB] = spd_x - spd_y - spd_z*_BODY_PARAM;
+    if(pre_spd[eMotorLB]>=0){
+        setDir(eMotorLB, eMotorDir_Forward);
+    }else{
+        setDir(eMotorLB, eMotorDir_Backward);
+    }
+
+    pre_spd[eMotorRB] = spd_x + spd_y + spd_z*_BODY_PARAM;
+    if(pre_spd[eMotorRB]>=0){
+        setDir(eMotorRB, eMotorDir_Forward);
+    }else{
+        setDir(eMotorRB, eMotorDir_Backward);
+    }
 }
 
 /**
@@ -192,12 +221,11 @@ void HerculesMotor::init(void) {
         pinMode((eMotorLF_DirPin + i), OUTPUT);
         setDir((MotorDrv_t)i,eMotorDir_Forward);
         delay(10);
-        setPwmPin(eMotorLB_PwmPin + i);
+        setPwmPin(eMotorRB_PwmPin + i);
         pinMode((eMotorLF_EpaPin + i), INPUT_PULLUP);
         attachInterrupt(eMotorLF_EpaPin + i, irq[i].handler, HALL_TRIGGER_TYPE);
     }
-
-    delay(200);
+    delay(10);
     pinMode(eMotorDrv_PwrPin, OUTPUT);
     digitalWrite(eMotorDrv_PwrPin, HIGH);
 
@@ -213,7 +241,7 @@ void HerculesMotor::deinit(void) {
     digitalWrite(eMotorDrv_PwrPin, LOW);
     for(uint8_t i=0; i<eMotorMax; i++) {
         detachInterrupt(eMotorLF_EpaPin + i);
-        setPwmPin(eMotorLB_PwmPin + i);
+        setPwmDuty((eMotorRB_PwmPin + i),0);
         delay(10);
         setDir((MotorDrv_t)i,eMotorDir_Forward);
     }
@@ -224,24 +252,17 @@ void HerculesMotor::deinit(void) {
   * @param
   * @retval
   */
+void HerculesMotor::setPulseA(MotorDrv_t drv) {
+    motor.pulseA[drv] += HALL_TRIGGER_INC;
+}
+
+/**
+  * @brief
+  * @param
+  * @retval
+  */
 boolean HerculesMotor::update(void) {
-    uint16_t tl = rostopic.getLinear();
-    uint16_t ta = rostopic.getAngular();
-
-    if (( tl != linear)||( ta != angular)) {
-        linear = tl;
-        angular = ta;
-        if (linear>0){
-            setDir(eMotorLF, eMotorDir_Forward);
-            //analogWrite(eMotorLF_PwmPin, 100);
-        }else if (linear<0){
-            setDir(eMotorLF, eMotorDir_Backward);
-            //analogWrite(eMotorLF_PwmPin, 100);
-        }else{
-            //analogWrite(eMotorLF_PwmPin, 0);
-        }
-
-    }
+    setSpd(rostopic.getLinearX(), rostopic.getLinearY(), rostopic.getAngularZ());
 
     return true;
 }

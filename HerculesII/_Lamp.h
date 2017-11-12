@@ -65,6 +65,8 @@ private:
 
 };
 
+extern HerculesLamp lamp;
+
 /* Exported functions ------------------------------------------------------- */
 
 #endif/*__LAMP_H__*/
